@@ -1,20 +1,21 @@
 -- +goose Up
 -- +goose StatementBegin
+
+CREATE TABLE authors (
+  id SERIAL PRIMARY KEY,
+  author_name VARCHAR,
+  year_b INTEGER,
+  country VARCHAR
+);
+
 CREATE TABLE rate_books (
   id SERIAL PRIMARY KEY,
   title VARCHAR UNIQUE,
-  author VARCHAR,
+  author_id INTEGER references authors(id),
   year_public INTEGER,
   year_read INTEGER,
   rate INTEGER,
-  foreign key (author)
-  references authors(author)
-);
-
-CREATE TABLE authors (
-  author VARCHAR,
-  year_b INTEGER,
-  country VARCHAR
+  time_stamp timestamp DEFAULT now()
 );
 
 -- +goose StatementEnd

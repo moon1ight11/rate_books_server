@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -8,17 +9,22 @@ func Router() {
 	// инициализация gin
 	r := gin.Default()
 
-	// get-роуты для книг
-	r.GET("/all_books", GetAllBooks)
-	r.GET("/ten_old_books", GetTenOldBooks)
-	r.GET("/ten_new_books", GetTenNewBooks)
-	r.GET("/max_rate_books", GetMAXBooks)
-	r.GET("/min_rate_books", GetMINBooks)
+	//  разрешения для CORS
+	r.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "OPTIONS"},
+		AllowHeaders:     []string{"Access-Control-Allow-Origin", "Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	}))
 
-	// get-роуты для авторов
+	// get для книг
+	r.GET("/all_books", GetAllBooks)
+
+	// get для авторов
 	r.GET("/all_authors", GetAllAuthors)
 
-	// post-роуты
+	// post
 	r.POST("/new_book", PostNewBook)
 	r.POST("/new_author", PostNewAuthor)
 
