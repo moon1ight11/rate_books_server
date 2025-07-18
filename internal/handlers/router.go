@@ -9,7 +9,7 @@ func Router() {
 	// инициализация gin
 	r := gin.Default()
 
-	//  разрешения для CORS
+	// разрешения для CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"PUT", "PATCH", "GET", "POST", "OPTIONS"},
@@ -17,6 +17,12 @@ func Router() {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
+
+	// роуты регистрации и авторизации
+	r.POST("/user/register", NewUser)
+	r.POST("/user/login", OldUser)
+	r.GET("/user/auth_check", CheckAut)
+	r.GET("/user/log_out", LogOut)
 
 	// get для книг
 	r.GET("/all_books", GetAllBooks)

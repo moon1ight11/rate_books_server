@@ -4,28 +4,35 @@ import (
 	"fmt"
 	"log"
 	"rate_books/internal/model"
-	// "rate_books/internal/handlers"
-	// "github.com/gin-gonic/gin"
 )
 
 // запрос на всех авторов из списка
-func SelectAuthors(page_number int, page_size int, where string, sort_field string, sort_order string, args []interface{}) ([]model.Authors, error) {
-	queryArgs := make([]interface{}, len(args))
-	copy(queryArgs, args)
-	queryArgs = append(queryArgs, page_number*page_size, page_size)
+func SelectAuthors(page_number int, page_size int, sort_field string, sort_order string, filters []interface{}, us_id int) ([]model.Authors, error) {
+	filterByAuthor := filters[0]
+	filterByCountry := filters[1]
+	filterYearBFrom := filters[2]
+	filterYearBTo := filters[3]
 
-	query := fmt.Sprintf(`SELECT 
+	query := fmt.Sprintf(`SELECT DISTINCT
 							author_name, 
 							year_b, 
 							country
-						FROM authors
-						%s 
+						FROM 
+							authors a
+						JOIN 
+							rate_books rb ON rb.author_id = a.id
+						WHERE
+								CASE WHEN $1::text IS NULL THEN true ELSE a.author_name ILIKE '%%' || $1::text || '%%' END
+							AND CASE WHEN $2::text IS NULL THEN true ELSE a.country ILIKE '%%' || $2::text || '%%' END
+							AND CASE WHEN $3::text IS NULL THEN true ELSE a.year_b >= $3::integer END
+    						AND CASE WHEN $4::text IS NULL THEN true ELSE a.year_b <= $4::integer END
+							AND CASE WHEN $7::integer IS NULL THEN true ELSE rb.book_owner = $7::integer END
 						ORDER BY %s %s 
-						OFFSET $%d LIMIT $%d`,
-		where, sort_field, sort_order, len(args)+1, len(args)+2)
+						OFFSET $5 LIMIT $6
+						`, sort_field, sort_order)
 
 	rows, err := DB.Query(
-		query, queryArgs...,
+		query, filterByAuthor, filterByCountry, filterYearBFrom, filterYearBTo, page_number*page_size, page_size, us_id,
 	)
 
 	if err != nil {
@@ -47,15 +54,27 @@ func SelectAuthors(page_number int, page_size int, where string, sort_field stri
 }
 
 // запрос на общее количество авторов
-func SelectAmountOfAuthors(where string, args []interface{}) (AmountOfAuthors int, err error) {
-	var total int
-	query := fmt.Sprintf(`
-				SELECT count(*) 
-				FROM authors
-				 %s`, where,
-	)
+func SelectAmountOfAuthors(filters []interface{}, us_id int) (AmountOfAuthors int, err error) {
+	filterByAuthor := filters[0]
+	filterByCountry := filters[1]
+	filterYearBFrom := filters[2]
+	filterYearBTo := filters[3]
 
-	err = DB.QueryRow(query, args...).Scan(&total)
+	var total int
+	query := fmt.Sprintf(`SELECT COUNT(DISTINCT a.id)
+						FROM 
+							authors a
+						LEFT JOIN 
+							rate_books rb ON rb.author_id = a.id
+						WHERE
+								CASE WHEN $1::text IS NULL THEN true ELSE a.author_name ILIKE '%%' || $1::text || '%%' END
+							AND CASE WHEN $2::text IS NULL THEN true ELSE a.country ILIKE '%%' || $2::text || '%%' END
+							AND CASE WHEN $3::text IS NULL THEN true ELSE a.year_b >= $3::integer END
+    						AND CASE WHEN $4::text IS NULL THEN true ELSE a.year_b <= $4::integer END
+							AND CASE WHEN $5::integer IS NULL THEN true ELSE rb.book_owner = $5::integer END
+				 `)
+
+	err = DB.QueryRow(query, filterByAuthor, filterByCountry, filterYearBFrom, filterYearBTo, us_id).Scan(&total)
 	if err != nil {
 		return 0, err
 	}
@@ -66,10 +85,11 @@ func SelectAmountOfAuthors(where string, args []interface{}) (AmountOfAuthors in
 }
 
 // проверка на совпадения в списке авторов
-func CheckAuthorsList(AuthorName string) bool {
+func CheckAuthorsList(AuthorName string, us_id int) bool {
 
-	query := `SELECT author_name AS avtor
-							FROM authors
+	query := `SELECT 
+				author_name AS avtor
+			FROM authors
 							`
 
 	rows, err := DB.Query(query)

@@ -1,17 +1,30 @@
 package handlers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"rate_books/internal/database"
 	"strconv"
-	"strings"
 )
 
 // список всех книг
 func GetAllBooks(c *gin.Context) {
+	// вытаскиваем из кук номер пользователя
+	us_id, err := AuthCheck(c)
+	if err != nil {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
+		log.Println("error auth1")
+		return
+	}
+
+	// проверяем пользователя по базе
+	if !database.SelectUserId(us_id) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
+		log.Println("error auth2")
+		return
+	}
+
 	// пагинация
 	page_number := c.DefaultQuery("page_number", "0")
 	page_size := c.DefaultQuery("page_size", "10")
@@ -41,69 +54,19 @@ func GetAllBooks(c *gin.Context) {
 	}
 
 	// фильтрация
-	var whereClauses []string
-	var args []interface{}
-	argPos := 1
+	filterByTitle := c.DefaultQuery("title", "")
+	filterByAuthor := c.DefaultQuery("author_name", "")
+	filterYearPublFrom := c.DefaultQuery("year_public_from", "0")
+	filterYearPublTo := c.DefaultQuery("year_public_to", "3000")
+	filterYearReadFrom := c.DefaultQuery("year_read_from", "0")
+	filterYearReadTo := c.DefaultQuery("year_read_to", "3000")
+	filterRateFrom := c.DefaultQuery("rate_from", "0")
+	filterRateTo := c.DefaultQuery("rate_to", "10") 
 
-	addFilter := func(field, operator, value string) {
-		if value != "" {
-			whereClauses = append(whereClauses, fmt.Sprintf("%s %s $%d", field, operator, argPos))
-			args = append(args, value)
-			argPos++
-		}
-	}
-
-	if title := c.Query("title"); title != "" {
-		addFilter("rb.title", "ILIKE", "%"+title+"%")
-	}
-
-	if author := c.Query("author_name"); author != "" {
-		addFilter("a.author_name", "ILIKE", "%"+author+"%")
-	}
-
-	if year_public_from := c.Query("year_public_from"); year_public_from != "" {
-		if _, err := strconv.Atoi(year_public_from); err == nil {
-			addFilter("rb.year_public", ">=", year_public_from)
-		}
-	}
-
-	if year_public_to := c.Query("year_public_to"); year_public_to != "" {
-		if _, err := strconv.Atoi(year_public_to); err == nil {
-			addFilter("rb.year_public", "<=", year_public_to)
-		}
-	}
-
-	if year_read_from := c.Query("year_read_from"); year_read_from != "" {
-		if _, err := strconv.Atoi(year_read_from); err == nil {
-			addFilter("rb.year_read", ">=", year_read_from)
-		}
-	}
-
-	if year_read_to := c.Query("year_read_to"); year_read_to != "" {
-		if _, err := strconv.Atoi(year_read_to); err == nil {
-			addFilter("rb.year_read", "<=", year_read_to)
-		}
-	}
-
-	if rate_from := c.Query("rate_from"); rate_from != "" {
-		if _, err := strconv.Atoi(rate_from); err == nil {
-			addFilter("rb.rate", ">=", rate_from)
-		}
-	}
-
-	if rate_to := c.Query("rate_to"); rate_to != "" {
-		if _, err := strconv.Atoi(rate_to); err == nil {
-			addFilter("rb.rate", "<=", rate_to)
-		}
-	}
-
-	where := ""
-	if len(whereClauses) > 0 {
-		where = "WHERE " + strings.Join(whereClauses, " AND ")
-	}
+	filters := []interface{}{filterByTitle, filterByAuthor, filterYearPublFrom, filterYearPublTo, filterYearReadFrom, filterYearReadTo, filterRateFrom, filterRateTo}
 
 	// запрос
-	all_books, err := database.SelectBooks(pageNumberInt, pageSizeInt, where, sort_field, sort_order, args)
+	all_books, err := database.SelectBooks(pageNumberInt, pageSizeInt, sort_field, sort_order, filters, us_id)
 	if err != nil {
 		log.Println("ошибка", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
@@ -111,7 +74,7 @@ func GetAllBooks(c *gin.Context) {
 	}
 
 	// количество книг
-	AmountofBooks, err := database.SelectAmountOfBooks(where, args)
+	AmountofBooks, err := database.SelectAmountOfBooks(filters, us_id)
 	if err != nil {
 		log.Println("err:", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid amount of books"})

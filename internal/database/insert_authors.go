@@ -21,7 +21,8 @@ func InsertNewAuthor(a model.Authors) error {
 func SearchAuthorId(author_name string) (int, error) {
 	query :=
 		`SELECT id 
-			FROM authors
+			FROM 
+				authors
 			WHERE author_name = $1`
 
 	rows, err := DB.Query(
