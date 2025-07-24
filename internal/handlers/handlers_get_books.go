@@ -13,15 +13,15 @@ func GetAllBooks(c *gin.Context) {
 	// вытаскиваем из кук номер пользователя
 	us_id, err := AuthCheck(c)
 	if err != nil {
+		log.Println("Error in AuthCheck(GetAllBooks)", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth1")
 		return
 	}
 
 	// проверяем пользователя по базе
 	if !database.SelectUserId(us_id) {
+		log.Println("Error in SelectUserID(GetAllBooks)")
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth2")
 		return
 	}
 
@@ -49,6 +49,7 @@ func GetAllBooks(c *gin.Context) {
 		"title": true, "author_name": true, "year_public": true, "year_read": true, "rate": true,
 	}
 	if !allowedSortFields[sort_field] {
+		log.Println("Error in allowedSortFields(GetAllBooks)", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort field"})
 		return
 	}
@@ -61,14 +62,14 @@ func GetAllBooks(c *gin.Context) {
 	filterYearReadFrom := c.DefaultQuery("year_read_from", "0")
 	filterYearReadTo := c.DefaultQuery("year_read_to", "3000")
 	filterRateFrom := c.DefaultQuery("rate_from", "0")
-	filterRateTo := c.DefaultQuery("rate_to", "10") 
+	filterRateTo := c.DefaultQuery("rate_to", "10")
 
 	filters := []interface{}{filterByTitle, filterByAuthor, filterYearPublFrom, filterYearPublTo, filterYearReadFrom, filterYearReadTo, filterRateFrom, filterRateTo}
 
 	// запрос
 	all_books, err := database.SelectBooks(pageNumberInt, pageSizeInt, sort_field, sort_order, filters, us_id)
 	if err != nil {
-		log.Println("ошибка", err)
+		log.Println("Error in SelectBooks(GetAllBooks)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
@@ -76,7 +77,7 @@ func GetAllBooks(c *gin.Context) {
 	// количество книг
 	AmountofBooks, err := database.SelectAmountOfBooks(filters, us_id)
 	if err != nil {
-		log.Println("err:", err)
+		log.Println("Error in SelectAmountOfBooks(GetAllBooks)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid amount of books"})
 		return
 	}

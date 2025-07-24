@@ -13,15 +13,15 @@ func GetAllAuthors(c *gin.Context) {
 	// вытаскиваем из кук номер пользователя
 	us_id, err := AuthCheck(c)
 	if err != nil {
+		log.Println("Error in AuthCheck(GetAllAuthors)", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth1")
 		return
 	}
 
 	// проверяем пользователя по базе
 	if !database.SelectUserId(us_id) {
+		log.Println("Error in SelectUserID(GetAllAuthors)", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth2")
 		return
 	}
 
@@ -49,6 +49,7 @@ func GetAllAuthors(c *gin.Context) {
 		"author_name": true, "year_b": true, "country": true,
 	}
 	if !allowedSortFields[sort_field] {
+		log.Println("Error in allowedSortFields(GetAllAuthors)", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid sort field"})
 		return
 	}
@@ -64,7 +65,7 @@ func GetAllAuthors(c *gin.Context) {
 	// запрос
 	all_authors, err := database.SelectAuthors(pageNumberInt, pageSizeInt, sort_field, sort_order, filters, us_id)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error in SelectAuthors(GetAllAuthors)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
@@ -72,7 +73,7 @@ func GetAllAuthors(c *gin.Context) {
 	// количество авторов
 	AmountofAuthors, err := database.SelectAmountOfAuthors(filters, us_id)
 	if err != nil {
-		log.Println("err:", err)
+		log.Println("Error in SelectAmountOfAuthors(GetAllAuthors)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid amount of books"})
 		return
 	}

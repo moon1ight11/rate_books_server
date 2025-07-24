@@ -11,7 +11,7 @@ func InsertNewAuthor(a model.Authors) error {
 
 	_, err := DB.Exec(query, a.Author_name, a.Year_born, a.Country)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error in query InsertNewAuthor",err)
 		return err
 	}
 	return nil
@@ -29,6 +29,7 @@ func SearchAuthorId(author_name string) (int, error) {
 		query, author_name,
 	)
 	if err != nil {
+		log.Println("Error in query SearchAuthorId", err)
 		return 0, err
 	}
 	defer rows.Close()
@@ -37,6 +38,7 @@ func SearchAuthorId(author_name string) (int, error) {
 	for rows.Next() {
 		err = rows.Scan(&AuthorID)
 		if err != nil {
+			log.Println("Error in scan SearchAuthorId", err)
 			return 0, err
 		}
 	}

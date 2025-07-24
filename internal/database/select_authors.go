@@ -36,6 +36,7 @@ func SelectAuthors(page_number int, page_size int, sort_field string, sort_order
 	)
 
 	if err != nil {
+		log.Println("Error in query SelectAuthors", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -45,6 +46,7 @@ func SelectAuthors(page_number int, page_size int, sort_field string, sort_order
 		var Author model.Authors
 		err := rows.Scan(&Author.Author_name, &Author.Year_born, &Author.Country)
 		if err != nil {
+			log.Println("Error in scan SelectAuthors", err)
 			return nil, err
 		}
 		Authors = append(Authors, Author)
@@ -76,6 +78,7 @@ func SelectAmountOfAuthors(filters []interface{}, us_id int) (AmountOfAuthors in
 
 	err = DB.QueryRow(query, filterByAuthor, filterByCountry, filterYearBFrom, filterYearBTo, us_id).Scan(&total)
 	if err != nil {
+		log.Println("Error in query SelectAmountOfAuthors", err)
 		return 0, err
 	}
 
@@ -86,7 +89,6 @@ func SelectAmountOfAuthors(filters []interface{}, us_id int) (AmountOfAuthors in
 
 // проверка на совпадения в списке авторов
 func CheckAuthorsList(AuthorName string, us_id int) bool {
-
 	query := `SELECT 
 				author_name AS avtor
 			FROM authors
@@ -94,7 +96,7 @@ func CheckAuthorsList(AuthorName string, us_id int) bool {
 
 	rows, err := DB.Query(query)
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error in query CheckAuthorsList", err)
 	}
 	defer rows.Close()
 
@@ -102,7 +104,7 @@ func CheckAuthorsList(AuthorName string, us_id int) bool {
 		var avtor string
 		err := rows.Scan(&avtor)
 		if err != nil {
-			log.Fatal(err)
+			log.Println("Error in scan CheckAuthorsList", err)
 		}
 
 		if avtor == AuthorName {

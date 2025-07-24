@@ -2,6 +2,7 @@ package database
 
 import (
 	"fmt"
+	"log"
 	"rate_books/internal/model"
 )
 
@@ -45,6 +46,7 @@ func SelectBooks(page_number int, page_size int, sort_field string, sort_order s
 	)
 
 	if err != nil {
+		log.Println("Error in query SelectBooks", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -54,6 +56,7 @@ func SelectBooks(page_number int, page_size int, sort_field string, sort_order s
 		var book model.Book
 		err := rows.Scan(&book.Title, &book.Author.Author_name, &book.Year_public, &book.Year_read, &book.Rate)
 		if err != nil {
+			log.Println("Error in scan SelectBooks", err)
 			return nil, err
 		}
 		Books = append(Books, book)
@@ -93,6 +96,7 @@ func SelectAmountOfBooks(filters []interface{}, us_id int) (AmountOfBooks int, e
 						`)
 	err = DB.QueryRow(query, filterByTitle, filterByAuthor, filterYearPublFrom, filterYearPublTo, filterYearReadFrom, filterYearReadTo, filterRateFrom, filterRateTo, us_id).Scan(&total)
 	if err != nil {
+		log.Println("Error in query SelectAmountOfBooks", err)
 		return 0, err
 	}
 

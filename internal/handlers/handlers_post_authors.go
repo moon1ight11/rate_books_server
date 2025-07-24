@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"log"
+	"net/http"
 	"rate_books/internal/database"
 	"rate_books/internal/model"
 )
@@ -13,29 +13,32 @@ func PostNewAuthor(c *gin.Context) {
 	// вытаскиваем из кук номер пользователя
 	us_id, err := AuthCheck(c)
 	if err != nil {
+		log.Println("Error in AuthCheck(PostNewAuthor)", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth1")
 		return
 	}
 
 	// проверяем пользователя по базе
 	if !database.SelectUserId(us_id) {
+		log.Println("Error in SelectUserId(PostNewAuthor)", err)
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth2")
 		return
 	}
 	var Author model.Authors
 	if err := c.ShouldBindJSON(&Author); err != nil {
+		log.Println("Error in ShouldBindJSON(PostNewAuthor)", err)
 		c.JSON((http.StatusBadRequest), gin.H{"error": err.Error()})
 	}
 
 	err = database.InsertNewAuthor(Author)
 	if err != nil {
+		log.Println("Error in InsertNewAuthor(PostNewAuthor)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 	}
 
 	err = database.InsertNewBook(NewBook, us_id)
 	if err != nil {
+		log.Println("Error in InsertNewBook(PostNewAuthor)", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 	}
 

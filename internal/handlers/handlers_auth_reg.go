@@ -13,22 +13,22 @@ import (
 func NewUser(c *gin.Context) {
 	var NewUser model.User
 	if err := c.ShouldBindJSON(&NewUser); err != nil {
+		log.Println("Error in ShouldBindJSON", err)
 		c.JSON((http.StatusBadRequest), gin.H{"error": err.Error()})
 		return
 	}
 
-	log.Println(NewUser)
-
 	UserName := NewUser.UserName
 
 	if !database.CheckUsersList(UserName) {
+		log.Println("Error in CheckUsersList")
 		c.JSON(http.StatusOK, gin.H{"check_user": false})
 		return
 	}
 
 	user_id, err := database.UserInsert(NewUser)
 	if err != nil {
-		log.Println("ошибка", err)
+		log.Println("Error in UserInsert", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 		return
 	}
@@ -43,26 +43,24 @@ func NewUser(c *gin.Context) {
 func OldUser(c *gin.Context) {
 	var OldUser model.User
 	if err := c.ShouldBindJSON(&OldUser); err != nil {
+		log.Println("Error in ShouldBindJSON", err)
 		c.JSON((http.StatusBadRequest), gin.H{"error": err.Error()})
 		return
 	}
-
-	log.Println(OldUser)
 
 	UserNameInput := OldUser.UserName
 	UserPassInput := OldUser.Pass
 
 	UserIdDB, UserPassDB, err := database.SelectUserName(UserNameInput)
-
 	if err != nil {
+		log.Println("Error in SelectUserName", err)
 		c.JSON((http.StatusForbidden), gin.H{"error": "error in select"})
-		log.Println("error in select")
 		return
 	}
 
 	if UserPassInput != UserPassDB {
+		log.Println("Password dont match")
 		c.JSON((http.StatusForbidden), gin.H{"error": "passwords dont match"})
-		log.Println("passwords dont match")
 		return
 	}
 
@@ -75,30 +73,27 @@ func OldUser(c *gin.Context) {
 // проверка залогиненности
 func CheckAut(c *gin.Context) {
 	value, err := c.Cookie("my_cookie")
-	log.Println(value)
 	if err != nil {
+		log.Println("Cookie not found")
 		c.JSON(http.StatusForbidden, gin.H{"error": "Cookie not found"})
-		log.Println("net kukov")
 		return
 	}
-	// c.JSON(http.StatusOK, gin.H{"user_id": value})
 
 	id, err := strconv.Atoi(value)
 	if err != nil {
-		log.Println("kuki plohie")
+		log.Println("Err in convert cookie")
 		return
 	}
 
 	if !database.SelectUserId(id) {
+		log.Println("Error in SelectUserID")
 		c.JSON(http.StatusForbidden, gin.H{"error": "Invalid auth"})
-		log.Println("error auth2")
 		return
 	}
 
 	user_name := database.NameById(id)
 
 	c.JSON(http.StatusOK, gin.H{"user_name": user_name})
-
 }
 
 // лог аут

@@ -7,9 +7,8 @@ import (
 
 // проверка свободности имени пользователя
 func CheckUsersList(UserName string) bool {
-
 	query :=
-		`SELECT 
+			`SELECT 
 				user_name AS uzer
 			FROM 
 				users`
@@ -17,7 +16,7 @@ func CheckUsersList(UserName string) bool {
 	rows, err := DB.Query(query)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Println("Error in query CheckUserList:", err)
 	}
 	defer rows.Close()
 
@@ -25,7 +24,7 @@ func CheckUsersList(UserName string) bool {
 		var uzer string
 		err := rows.Scan(&uzer)
 		if err != nil {
-			log.Println(err)
+			log.Println("Error in Scan CheckUserList", err)
 		}
 
 		if uzer == UserName {
@@ -46,7 +45,7 @@ func UserInsert(NewUser model.User) (int, error) {
 
 	err := DB.QueryRow(query, NewUser.UserName, NewUser.Pass).Scan(&user_id)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error in query UserInsert:", err)
 		return 0, err
 	}
 
@@ -67,20 +66,21 @@ func SelectUserName(UserName string) (int, string, error) {
 		query, UserName,
 	)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("Error in query SelectUserName:", err)
 		return 0, "", err
 	}
 
 	defer rows.Close()
 
 	if !rows.Next() {
-		log.Println("user not find")
+		log.Println("User not found")
 		return 0, "", err
 	}
 
 	var UserIdDB int
 	var UserPassDB string
 	if err := rows.Scan(&UserIdDB, &UserPassDB); err != nil {
+		log.Println("Error in Scan SelectUserName:", err)
 		return 0, "", err
 	}
 
@@ -97,20 +97,20 @@ func SelectUserId(UserId int) bool {
 		query, UserId,
 	)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("Error in SelectUserId query", err)
 		return false
 	}
 
 	defer rows.Close()
 
 	if !rows.Next() {
-		log.Println("user not find")
+		log.Println("User not found")
 		return false
 	}
 
 	err = rows.Scan(&user_name)
 	if err != nil {
-		log.Println(err)
+		log.Println("Error in Scan SelectUserID:", err)
 	}
 
 	return true
@@ -126,7 +126,7 @@ func NameById(UserId int) string {
 		query, UserId,
 	)
 	if err != nil {
-		log.Println("error:", err)
+		log.Println("Error in NameByID query", err)
 		return ""
 	}
 
@@ -134,7 +134,7 @@ func NameById(UserId int) string {
 	for rows.Next() {
 		err = rows.Scan(&user_name)
 		if err != nil {
-			log.Println(err)
+			log.Println("Error in Scan NameByID:", err)
 		}
 	}
 
