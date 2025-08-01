@@ -77,7 +77,7 @@ func SelectAmountOfBooks(filters []interface{}, us_id int) (AmountOfBooks int, e
 
 	var total int
 	query := fmt.Sprintln(
-		`SELECT 
+						`SELECT 
 							COUNT(*)
        					FROM 
 							rate_books rb
@@ -103,4 +103,36 @@ func SelectAmountOfBooks(filters []interface{}, us_id int) (AmountOfBooks int, e
 	AmountOfBooks = total
 
 	return AmountOfBooks, nil
+}
+
+// запрос на книги с рейтингом 8+ для рекоммендаций
+func SelectRecBooks() (model.Book2, error) {
+	query := fmt.Sprintln(
+		`SELECT
+			rb.title, 
+			a.author_name,
+			rb.year_public,
+			c.id
+		FROM 
+			rate_books rb
+		JOIN 
+			authors a ON rb.author_id = a.id
+		JOIN
+			covers c ON rb.cover_id = c.id
+		WHERE
+			rb.rate > 6
+		ORDER BY RANDOM()
+		LIMIT 
+			1`,
+	)
+
+	var Rec_book model.Book2
+
+	err := DB.QueryRow(query).Scan(&Rec_book.Title, &Rec_book.Author, &Rec_book.Year_public, &Rec_book.C_id)
+	if err != nil {
+		log.Println("Error in query SelectRecBooks", err)
+		return model.Book2{}, err
+	}
+
+	return Rec_book, nil
 }

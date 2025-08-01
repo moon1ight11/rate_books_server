@@ -20,4 +20,5 @@ type Book2 struct {
 	Year_public int    `json:"year_public"`
 	Year_read   int    `json:"year_read"`
 	Rate        int    `json:"rate"`
+	C_id        int    `json:"c_id"`
 }

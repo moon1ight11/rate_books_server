@@ -15,6 +15,12 @@ CREATE TABLE authors (
   country VARCHAR
 );
 
+CREATE TABLE covers (
+  id SERIAL PRIMARY KEY,
+  original_name VARCHAR,
+  created_at timestamp DEFAULT now()
+);
+
 CREATE TABLE rate_books (
   id SERIAL PRIMARY KEY,
   title VARCHAR UNIQUE,
@@ -22,8 +28,9 @@ CREATE TABLE rate_books (
   year_public INTEGER,
   year_read INTEGER,
   rate INTEGER,
-  time_stamp timestamp DEFAULT now(),
-  book_owner INTEGER references users(id)
+  cover_id INTEGER references covers(id),
+  book_owner INTEGER references users(id),
+  time_stamp timestamp DEFAULT now()
 );
 
 -- +goose StatementEnd

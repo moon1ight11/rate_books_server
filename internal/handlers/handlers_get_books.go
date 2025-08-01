@@ -84,3 +84,15 @@ func GetAllBooks(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"all_books": all_books, "amountOfItems": AmountofBooks})
 }
+
+// книги с рейтингом 8+ для рекоммендаций
+func BooksRecomm(c *gin.Context) {
+	rec_books, err := database.SelectRecBooks()
+	if err != nil {
+		log.Println("Error in SelectRecBooks(GetAllBooks)", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid recommend books"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"rec_books": rec_books})
+}

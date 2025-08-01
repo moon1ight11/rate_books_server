@@ -34,6 +34,7 @@ func PostNewBook(c *gin.Context) {
 		return
 	}
 
+	// проверка автора
 	AuthorName := NewBook.Author
 	if !database.CheckAuthorsList(AuthorName, us_id) {
 		c.JSON(http.StatusOK, gin.H{"check_author": false})
