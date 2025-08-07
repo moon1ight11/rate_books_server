@@ -10,7 +10,7 @@ import (
 
 // список всех авторов
 func GetAllAuthors(c *gin.Context) {
-	// вытаскиваем из кук номер пользователя
+	// вытаскиваем из кук id
 	us_id, err := AuthCheck(c)
 	if err != nil {
 		log.Println("Error in AuthCheck(GetAllAuthors)", err)
@@ -77,5 +77,6 @@ func GetAllAuthors(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid amount of books"})
 		return
 	}
+	
 	c.JSON(http.StatusOK, gin.H{"all_authors": all_authors, "amountOfItems": AmountofAuthors})
 }

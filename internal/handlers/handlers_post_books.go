@@ -9,10 +9,10 @@ import (
 )
 
 // новая книга
-var NewBook model.Book2
+var NewBook model.Book
 
 func PostNewBook(c *gin.Context) {
-	// вытаскиваем из кук номер пользователя
+	// вытаскиваем из кук номер id
 	us_id, err := AuthCheck(c)
 	if err != nil {
 		log.Println("Error in AuthCheck(PostNewBook)", err)
@@ -27,7 +27,7 @@ func PostNewBook(c *gin.Context) {
 		return
 	}
 
-	// запрос на добавление
+	// получаем книгу с фронта
 	if err := c.ShouldBindJSON(&NewBook); err != nil {
 		log.Println("Error in ShouldBindJSON(PostNewBook)", err)
 		c.JSON((http.StatusBadRequest), gin.H{"error": err.Error()})
@@ -37,15 +37,18 @@ func PostNewBook(c *gin.Context) {
 	// проверка автора
 	AuthorName := NewBook.Author
 	if !database.CheckAuthorsList(AuthorName, us_id) {
+		// отправляем request "false", на фронте переходим на страницу с добавлением автора
 		c.JSON(http.StatusOK, gin.H{"check_author": false})
 		return
 	} else {
+		// добавляем книгу в БД
 		err := database.InsertNewBook(NewBook, us_id)
 		if err != nil {
 			log.Println("Error in InsertNewBook(PostNewBook)", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err})
 			return
 		}
+		
 		c.JSON(http.StatusCreated, gin.H{"message": "Книга успешно добавлена"})
 	}
 }

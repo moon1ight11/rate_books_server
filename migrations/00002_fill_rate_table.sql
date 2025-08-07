@@ -6,6 +6,9 @@ INSERT INTO users
 VALUES
 	(1, 'Moon11ight', '291100');
 
+SELECT SETVAL('users_id_seq', (SELECT MAX(id)
+FROM users));
+
 INSERT INTO authors
 	(id, author_name, year_b, country)
 VALUES
@@ -84,7 +87,11 @@ VALUES
 	(73, 'Ф.Достоевский', 1821, 'Россия'),
 	(74, 'А.Карр', 1934, 'Англия'),
 	(75, 'О.Дадзай', 1909, 'Япония'),
-	(76, 'В.Точинов', 1966, 'Россия');
+	(76, 'В.Точинов', 1966, 'Россия'),
+	(79, 'И.Можейко', 1934, 'Россия');
+
+SELECT SETVAL('authors_id_seq', (SELECT MAX(id)
+FROM authors));
 
 INSERT INTO covers
 	(id, original_name, created_at)
@@ -163,6 +170,9 @@ VALUES
 	(72, 'skot_dvor.jpg', '2025-07-29 20:11:32.070370'),
 	(73, 'bedn_lyd.jpg', '2025-07-29 20:14:40.070395'),
 	(74, 'post.jpg', '2025-07-29 20:19:13.704013');
+
+SELECT SETVAL('covers_id_seq', (SELECT MAX(id)
+FROM covers));
 
 INSERT INTO rate_books
 	(id, title, author_id, year_public, year_read, rate, cover_id, book_owner, time_stamp)
@@ -297,8 +307,11 @@ VALUES
 	(138, 'Простой способ перестать курить', 74, 1985, 2025, 5, null, 1, '2025-07-29 20:16:16.992800'),
 	(139, 'Пост', 23, 2021, 2025, 8, 74, 1, '2025-07-29 20:19:58.909310'),
 	(140, 'Человек недостойный', 75, 1948, 2025, 6, null, 1, '2025-07-29 20:17:22.242698'),
-	(141, 'Скотный двор', 5, 1945, 2025, 8, 72, 1, '2025-07-29 20:12:16.097128');
+	(141, 'Скотный двор', 5, 1945, 2025, 8, 72, 1, '2025-07-29 20:12:16.097128'),
+	(145, '1185 год. Восток-Запад', 79, 1989, 2025, 6, null, 1, '2025-08-04 09:59:06.277637');
 
+SELECT SETVAL('rate_books_id_seq', (SELECT MAX(id)
+FROM rate_books));
 -- +goose StatementEnd
 
 -- +goose Down

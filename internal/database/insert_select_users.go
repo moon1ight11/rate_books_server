@@ -17,6 +17,7 @@ func CheckUsersList(UserName string) bool {
 
 	if err != nil {
 		log.Println("Error in query CheckUserList:", err)
+		return false
 	}
 	defer rows.Close()
 
@@ -25,6 +26,7 @@ func CheckUsersList(UserName string) bool {
 		err := rows.Scan(&uzer)
 		if err != nil {
 			log.Println("Error in Scan CheckUserList", err)
+			return false
 		}
 
 		if uzer == UserName {
@@ -111,6 +113,7 @@ func SelectUserId(UserId int) bool {
 	err = rows.Scan(&user_name)
 	if err != nil {
 		log.Println("Error in Scan SelectUserID:", err)
+		return false
 	}
 
 	return true
@@ -134,7 +137,8 @@ func NameById(UserId int) string {
 	for rows.Next() {
 		err = rows.Scan(&user_name)
 		if err != nil {
-			log.Println("Error in Scan NameByID:", err)
+			log.Println("Error in Scan NameByID", err)
+			return ""
 		}
 	}
 

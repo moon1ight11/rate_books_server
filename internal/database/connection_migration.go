@@ -8,6 +8,7 @@ import (
 	"log"
 )
 
+// объявление УРЛ для БД и директории миграций
 const (
 	url           = "postgres://fedor:fedor_pass@localhost:15432/rate"
 	migrationsDir = "./migrations"

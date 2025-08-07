@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"rate_books/internal/database"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
 )
 
@@ -16,6 +15,7 @@ func AddPicture(c *gin.Context) {
 	err := c.SaveUploadedFile(file, "./files/covers/"+file.Filename)
 	if err != nil {
 		log.Println("Error in SaveUploadedFile", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in SaveUploadedFile"})
 		return
 	}
 
@@ -33,12 +33,14 @@ func GetPicture(c *gin.Context) {
 	id, err := strconv.Atoi(idString)
 	if err != nil {
 		log.Println("Error in convert cover_id(GetPicture)", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in convert cover_id"})
 		return
 	}
 
 	cover_name, err := database.SelectNameIMGByID(id)
 	if err != nil {
 		log.Println("Error in SelectNameIMGByID(GetPicture)", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error in SelectNameIMGByID"})
 		return
 	}
 

@@ -19,6 +19,7 @@ func InsertIMG(cover_name string) int {
 	return c_id
 }
 
+// название картинки по id
 func SelectNameIMGByID(cover_id int) (string, error) {
 	query := `SELECT original_name FROM covers WHERE id = $1 `
 	

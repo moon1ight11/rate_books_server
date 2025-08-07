@@ -54,7 +54,7 @@ func SelectBooks(page_number int, page_size int, sort_field string, sort_order s
 	var Books []model.Book
 	for rows.Next() {
 		var book model.Book
-		err := rows.Scan(&book.Title, &book.Author.Author_name, &book.Year_public, &book.Year_read, &book.Rate)
+		err := rows.Scan(&book.Title, &book.Author, &book.Year_public, &book.Year_read, &book.Rate)
 		if err != nil {
 			log.Println("Error in scan SelectBooks", err)
 			return nil, err
@@ -106,7 +106,7 @@ func SelectAmountOfBooks(filters []interface{}, us_id int) (AmountOfBooks int, e
 }
 
 // запрос на книги с рейтингом 8+ для рекоммендаций
-func SelectRecBooks() (model.Book2, error) {
+func SelectRecBooks() (model.Book, error) {
 	query := fmt.Sprintln(
 		`SELECT
 			rb.title, 
@@ -126,12 +126,12 @@ func SelectRecBooks() (model.Book2, error) {
 			1`,
 	)
 
-	var Rec_book model.Book2
+	var Rec_book model.Book
 
 	err := DB.QueryRow(query).Scan(&Rec_book.Title, &Rec_book.Author, &Rec_book.Year_public, &Rec_book.C_id)
 	if err != nil {
 		log.Println("Error in query SelectRecBooks", err)
-		return model.Book2{}, err
+		return model.Book{}, err
 	}
 
 	return Rec_book, nil

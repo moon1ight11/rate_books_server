@@ -1,10 +1,10 @@
 package handlers
 
 import (
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"strconv"
-	"github.com/gin-gonic/gin"
+	"rate_books/internal/jwtmod"
 )
 
 // вытаскиваем id пользователя из куков
@@ -16,12 +16,18 @@ func AuthCheck(c *gin.Context) (int, error) {
 		return 0, err
 	}
 
-	id, err := strconv.Atoi(value)
+	myClaims := jwtmod.MyClaims{}
+
+	token, err := jwtmod.ParseToken(value, &myClaims)
 	if err != nil {
-		log.Println("Error in convert cookie")
+		log.Println("Err in parse token", err)
+	}
+
+	if !token.Valid {
+		log.Println("Token not valid")
+		c.JSON(http.StatusForbidden, gin.H{"error": "Token not valid"})
 		return 0, err
 	}
 
-	return id, nil
+	return myClaims.UserId, nil
 }
-
