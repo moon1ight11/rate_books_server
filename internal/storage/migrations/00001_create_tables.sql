@@ -9,7 +9,7 @@ CREATE TABLE
         updated_at  TIMESTAMPTZ,
         name        VARCHAR NOT NULL,
         email       VARCHAR NOT NULL UNIQUE,
-        pass_hash   VARCHAR NOT NULL
+        pass        VARCHAR NOT NULL
     );
 CREATE INDEX idx_users_name ON rate_books.users(name);
 CREATE INDEX idx_users_email ON rate_books.users(email);
