@@ -23,7 +23,7 @@ CREATE TABLE
         name        VARCHAR NOT NULL,
         country     VARCHAR,
         year_born   INTEGER,
-        description VARCHAR
+        description TEXT
     );
 CREATE INDEX idx_authors_name ON rate_books.authors(surname, name);
 CREATE INDEX idx_authors_country ON rate_books.authors(country);
@@ -36,11 +36,11 @@ CREATE TABLE
         title       VARCHAR NOT NULL,
         author_id   UUID REFERENCES rate_books.authors(id) ON DELETE CASCADE,
         genre       VARCHAR,
-        owner_id    UUID REFERENCES rate_books.users(id),
+        owner_id    UUID REFERENCES rate_books.users(id) ON DELETE CASCADE,
         year_public INTEGER,
         year_read   INTEGER NOT NULL,
         grade       INTEGER NOT NULL,
-        description VARCHAR
+        description TEXT
     );
 CREATE INDEX idx_books_title ON rate_books.books(title);
 CREATE INDEX idx_books_author_id ON rate_books.books(author_id);
