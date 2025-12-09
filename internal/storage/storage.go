@@ -3,10 +3,10 @@ package storage
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"rate_books/internal/config"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
+	"log"
+	"rate_books/internal/config"
 )
 
 // метод DB для применения миграций

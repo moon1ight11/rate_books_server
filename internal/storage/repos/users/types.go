@@ -1,8 +1,8 @@
 package users
 
 import (
-	"rate_books/internal/storage"
 	"github.com/google/uuid"
+	"rate_books/internal/storage"
 )
 
 type Repo struct {

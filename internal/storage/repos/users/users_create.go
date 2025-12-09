@@ -7,27 +7,18 @@ import (
 
 // добавление пользователя в БД
 func (db *Repo) CreateUser(NewUser User) (uuid.UUID, error) {
-	transaction, err := db.DB.Begin()
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	defer transaction.Rollback()
-
 	query := `
 				INSERT INTO rate_books.users (name, pass, email)
 				VALUES ($1, $2, $3)
 				RETURNING id
 			`
 
-	var user_id uuid.UUID
+	var userID uuid.UUID
 
-	err = transaction.QueryRow(query, NewUser.Name, NewUser.Pass, NewUser.Email).Scan(&user_id)
+	err := db.DB.QueryRow(query, NewUser.Name, NewUser.Pass, NewUser.Email).Scan(&userID)
 	if err != nil {
-		return uuid.Nil, fmt.Errorf("Error in AddUser query: %w", err)
+		return uuid.Nil, fmt.Errorf("error in CreateUser query: %w", err)
 	}
 
-	transaction.Commit()
-
-	return user_id, nil
+	return userID, nil
 }
